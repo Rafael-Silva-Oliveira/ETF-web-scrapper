@@ -1,0 +1,138 @@
+---
+title: "ETF_data_mining"
+author: "Rafael Oliveira"
+date: "5/25/2021"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+#CTRL+ALT+I to create new chunk
+
+#Libraries
+```{r setup, include=FALSE}
+install.packages("selectr")
+install.packages("xml2")
+install.packages("rvest")
+install.packages("jsonlite")
+library(xml2)
+library(rvest)
+library(stringr)
+
+```
+
+
+#References
+```{r}
+#https://www.freecodecamp.org/news/an-introduction-to-web-scraping-using-r-40284110c848/
+#https://www.dataquest.io/blog/web-scraping-in-r-rvest/
+#https://swcarpentry.github.io/r-novice-inflammation/02-func-R/
+#https://towardsdatascience.com/web-scraping-tutorial-in-r-5e71fd107f32
+#https://www.freecodecamp.org/news/an-introduction-to-web-scraping-using-r-40284110c848/
+```
+
+
+#My ETFs
+```{r}
+my_ETFs = c("IE0005042456",
+            "IE00B5BMR087", 
+            "IE00BTJRMP35",
+            "IE00B0M63177",
+            "IE00B1YZSC51",
+            "IE00BYZK4776",
+            "IE00BYVQ9F29",
+            "IE00BYXG2H39",
+            "IE00B3WJKG14",
+            "IE00B0M62Q58",
+            "LU1781541179",
+            "FR0007052782",
+            "LU0252633754",
+            "LU0496786574",
+            "IE00BYTRRB94",
+            "IE00BYTRRD19",
+            "IE00B6YX5C33",
+            "IE00BH4GPZ28",
+            "IE00BWBXM948",
+            "IE00BK5BQT80",
+            "IE00B3VVMM84",
+            "IE00B945VV12",
+            "IE00B3XXRP09",
+            "IE00B810Q511",
+            "IE00BGV5VN51",
+            "IE00BZ02LR44",
+            "IE00BG370F43",
+            "IE00BTJRMP35",
+            "LU1681046931",
+            "LU1681045370",
+            "LU1681043599",
+            "LU1681048804",
+            "IE00BRKWGL70",
+            "IE00B5BMR087",
+            "IE00B0M63177",
+            "IE00B1YZSC51",
+            "IE00B4K48X80",
+            "IE00BZCQB185",
+            "IE00B4L5Y983",
+            "IE0031442068",
+            "IE00B53SZB19",
+            "LU0252633754",
+            "IE0032077012",
+            "IE00BYVJRP78")
+```
+
+
+#Web Scraper
+```{r Web Scraper, echo=TRUE, message=TRUE, warning=TRUE}
+automatic = function(ETF) {
+      ETF = read_html(paste0('https://www.justetf.com/de-en/etf-profile.html?query=',ETF,'&groupField=index&from=search&isin=',ETF,'#overview'))
+      ETF = ETF %>%
+            html_nodes(".h1,.val") %>% html_text()
+      return(ETF)
+}
+```
+
+#Info Retrieval and Storage
+```{r Info Retrieval, echo=TRUE, message=TRUE, warning=TRUE}
+loop = sapply(my_ETFs, automatic)
+
+Data = as.data.frame(do.call(cbind, loop), stringsAsFactors = TRUE) #do.call takes a function as input and splatters its other arguments to the function. It is widely used, for example, to assemble lists into simpler structures (often with rbind or cbind)
+
+final_data = Data[-c(1,3,14,15:30),] #remove unnecessary rows
+View(final_data)
+Data_complete = row.names(final_data) = c("Name","Ticket","Price","Fund Size","Replication","Type","Currency","Volatility","TER","Distribution","Fund Domicile")
+Data_complete
+final_data_switch = t(final_data) #t will switch the rows with columns and vice-versa
+View(final_data_switch)
+
+final_data_switch[final_data_switch$Distribution == "Accumulating"]
+
+
+final_data_switch = as.data.frame(paste0('https://www.justetf.com/de-en/etf-profile.html?query=',ETF2,'&groupField=index&from=search&isin=',ETF2,'#overview'))
+```
+
+
+
+###################################################################################
+final_data_switch = t(final_data)
+View(final_data_switch)
+
+str_replace_all(final_data, "[\r\n]", "")
+
+
+#Name
+automatic1 = function(ETF) {
+      ETF = read_html(paste0('https://www.justetf.com/de-en/etf-profile.html?query=',ETF,'&groupField=index&from=search&isin=',ETF,'#overview'))
+      ETF = ETF %>%
+            html_nodes(".h1") %>% html_text()
+      return(ETF)
+}
+#paste0 will link the strings with the variable I want to have in my input 
+
+loop1 = sapply(my_ETFs, automatic1)
+Data1 = as.data.frame(do.call(cbind, loop1))
+View(Data1)
+final_data1 = Data1[-c(2),]
+Data_complete1 = row.names(final_data1) = c("Name")
+final_data1_switch = t(final_data1)
+View(final_data1)
+View(final_data1_switch)
+
